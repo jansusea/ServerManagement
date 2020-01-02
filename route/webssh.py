@@ -6,8 +6,7 @@ from index import app,sql,url
 from .login import cklogin
 url.append( {"title": "SHELL",
     "children": [
-        {"title": "web shell","href": "/ssh"},
-        {"title": "批量主机","href": "/BatchExec"}
+        {"title": "web shell","href": "/ssh"}
         ]
     })
 sshListDict={}
@@ -87,78 +86,3 @@ def GetSsh():
         chan.close()
         del sshListDict[ids]
         return json.dumps({'resultCode':1})
-
-#批量远程主机执行shell
-@app.route('/BatchExec',methods=['GET','POST'])
-@cklogin()
-def BatchExec():
-    if request.method == 'GET':
-        return render_template('batchExec.html')
-#添加主机
-@app.route('/CreateBatchExec',methods=['POST'])
-@cklogin()
-def CreateBatchExec():
-    IP = request.values.get('IP')
-    PORT = request.values.get('PORT')
-    PWD = request.values.get('PWD')
-    GROUPS = request.values.get('GROUPS')
-    NOTE = request.values.get('NOTE')
-    USERNAME = request.values.get('USERNAME')
-    ROOTPWD = request.values.get('ROOTPWD')
-    if not (IP and PWD and USERNAME) :
-        return json.dumps({'resultCode':1,'result':'请输入正确的IP和账号密码'})
-    sqlResult = sql.insertRemoteHost(IP=IP,PORT=PORT,CTYPE='PWD',USERNAME=USERNAME,GROUPS=GROUPS,NOTE=NOTE,PWD=PWD,PKPATH=None,ROOTPWD=ROOTPWD)
-    if sqlResult[0]:
-        return json.dumps({'resultCode':0})
-    else:
-        return json.dumps({'resultCode':1,'result':str(sqlResult[1])})
-#查询主机
-@app.route('/SelectBatchExec',methods=['POST'])
-@cklogin()
-def SelectBatchExec():
-    sqlResult = sql.selectRemoteHost()
-    if sqlResult[0]:
-        return json.dumps({'resultCode':0,'result':list(sqlResult[1])})
-    else:
-        return json.dumps({'resultCode':1,'result':str(sqlResult[1])})
-#删除主机
-@app.route('/DeletetBatchExec',methods=['POST'])
-@cklogin()
-def DeletetBatchExec():
-    ipList = json.loads(request.values.get('ipList'))
-    for i in ipList:
-        sqlResult = sql.deleteRemoteHost(i)
-        if not sqlResult[0]:
-            return json.dumps({'resultCode':1,'result':str(sqlResult[1])})
-    return json.dumps({'resultCode':0})
-#执行远程SHELL
-@app.route('/BatchExecShell',methods=['POST'])
-@cklogin()
-def BatchExecShell():
-    ipList = json.loads(request.values.get('ipList'))
-    shell = request.values.get('shell')
-    userRoot = (True if shell[-5:] == '#root' else False)
-    if userRoot:
-        shell = shell[:-5]
-    for i in ipList:
-        sqlResult = sql.selectRemoteHostForIP(i)
-        if not sqlResult[0]:
-            return json.dumps({'resultCode':1,'result':str(sqlResult[1])})
-        else:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ip = sqlResult[1][0]
-            port = sqlResult[1][1]
-            username = sqlResult[1][2]
-            pwd = sqlResult[1][3]
-            rootpwd = sqlResult[1][4]
-            ssh.connect(ip,int(port),username,pwd)
-            if userRoot :
-                #如果以root身份运行shell,先su并回车,输入密码,再执行shell
-                std_in,std_out,std_err = ssh.exec_command('su'+'\n',get_pty=True)
-                std_in.write(rootpwd+'\n')
-                std_in.write(shell+'\n')
-            else:
-                ssh.exec_command(shell+'\n',get_pty=True)
-            ssh.close()
-    return json.dumps({'resultCode':0})

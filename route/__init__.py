@@ -6,10 +6,4 @@ from .echarts import *
 from .setTask import *
 from .webssh import *
 from .login import *
-from .linkButton import *
 from .plugins import *
-from .controlWin import *
-
-from config.config import NATPenetration
-if NATPenetration:
-    from .PenetrationSend import *
