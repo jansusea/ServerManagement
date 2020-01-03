@@ -2,9 +2,9 @@ import paramiko
 import threading
 import time,random,json
 from flask import request,redirect,render_template
-from index import app,sql,url
+from index import app,sql,myurl
 from .login import cklogin
-url.append( {"title": "SHELL",
+myurl.append( {"title": "SHELL",
     "children": [
         {"title": "web shell","href": "/ssh"}
         ]

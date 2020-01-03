@@ -1,12 +1,12 @@
 from flask import request,render_template,redirect,url_for,session,Response
-from index import app,url
+from index import app,myurl
 import base64,platform,os,time,json,subprocess
 from .login import cklogin
 SYSTEMDEB = None
 if 'LINUX' in platform.platform().upper():
     SYSTEMDEB = True
 if SYSTEMDEB:
-    url.append( {"title": "软件管理",
+    myurl.append( {"title": "软件管理",
         "children": [
             {"title": "nginx","href": "/plugins/nginx"},
             {"title": "mysql","href": "/plugins/mysql"}

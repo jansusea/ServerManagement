@@ -9,16 +9,16 @@ app.secret_key = '1996-05-16'
 sql = sqlClass()
 from route.login import cklogin
 
-url = []
+myurl = []
 
 
 @app.route('/', methods=['GET', 'POST'])
 @cklogin()
 def index():
     if request.method == 'GET':
-        return render_template('index.html', url=url)
+        return render_template('index.html', url=myurl)
     else:
-        return jsonify(url)
+        return jsonify(myurl)
 
 
 if __name__ == '__main__':

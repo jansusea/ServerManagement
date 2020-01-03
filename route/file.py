@@ -1,6 +1,6 @@
 from flask import request,render_template,redirect,send_file, send_from_directory,url_for,session,make_response
 import time
-from index import app,url,sql
+from index import app,myurl,sql
 import json
 import os
 from PIL import Image
@@ -12,7 +12,7 @@ import traceback
 from lib import extract
 from config.config import workPath
 from .login import cklogin
-url.append( {"title": "文件管理",
+myurl.append( {"title": "文件管理",
     "children": [
         {"title": "文件管理器","href": "/file"},
         {"title": "文件分享","href": "/getFileShare"}
@@ -108,7 +108,7 @@ def codeEdit():
     filename = b64decode_(request.form['path'])
     if os.path.getsize(filename) > 2097152 : return json.dumps({'resultCode':1,'fileCode':'不能在线编辑大于2MB的文件！'});
     with open(filename, 'rb') as f:
-        #文件编码,fuck you
+        #文件编码
         srcBody = f.read()
         char=chardet.detect(srcBody)
         fileCoding = char['encoding']
@@ -451,7 +451,6 @@ def b64decode_(v):
         return base64.b64decode(v).decode()
     except:
         #网页传来的base64内容,在被flask捕捉的时候,加号会被解码成空格,导致解码报错
-        #这个bug调了我半个小时,我还以为前端js生成的base64有问题,fuck
         return base64.b64decode(v.replace(' ','+')).decode()
 
 def b64encode_(v):

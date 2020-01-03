@@ -1,12 +1,12 @@
 import psutil
 from flask import request,render_template,redirect,send_file, send_from_directory,url_for,session,make_response
-from index import app,url
+from index import app,myurl
 import json
 import platform,os,datetime,sys
 from .login import cklogin
 import zipfile,time,os
 import random
-url.append( {
+myurl.append( {
         "title": "进程监控",
         "href": "/Process",
     })
